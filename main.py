@@ -6,16 +6,16 @@ import ctypes
 def bar():
     return 42
 
-# def foo(dll):
-#     proto = ctypes.PYFUNCTYPE(ctypes.c_int)
-#     params = ()
-#     fn = proto(("foo", dll), params)
-#     return fn()
+def foo(dll, f):
+    proto = ctypes.PYFUNCTYPE(ctypes.c_int, ctypes.c_float)
+    params = (1, "f"),
+    fn = proto(("foo", dll), params)
+    return fn(f)
 
 def main():
     dll = ctypes.PyDLL("./demo.so")
-    print(dll.foo())
-    # print(foo(dll))
+    # print(dll.foo(42)) # This can't pass floats, so gets printed as "0.0"
+    print(foo(dll, 42))
 
 if __name__ == "__main__":
     main()

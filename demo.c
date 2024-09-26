@@ -3,7 +3,7 @@
 
 #include <assert.h>
 
-int bar(void) {
+int bar(float f) {
 	PyObject *myModule = PyImport_ImportModule("main");
 	assert(myModule);
 
@@ -19,9 +19,11 @@ int bar(void) {
 	// In newer versions of Python, this function is identical,
 	// but doesn't start with an underscore:
 	// https://github.com/python/cpython/commit/be436e08b8bd9fcd2202d6ce4d924bba7551e96f
-	return _PyLong_AsInt(myResult);
+	return f + _PyLong_AsInt(myResult);
 }
 
-int foo(void) {
-	return bar();
+int foo(float f) {
+	// printf("i: %i\n", f);
+	printf("f: %f\n", f);
+	return bar(f);
 }
