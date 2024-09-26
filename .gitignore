@@ -1,6 +1,9 @@
+.vscode/c_cpp_properties.json
 .vscode/settings.json
 mod_dlls
 a.exe
 a.out
+demo.so
 log.log
+mini.out
 foo.so
