@@ -3,19 +3,22 @@
 import ctypes
 
 
+def main():
+    dll = ctypes.PyDLL("./demo.so")
+    print(dll.foo(ctypes.c_float(42)))
+    # print(foo(dll, 42))
+
+
 def bar():
     return 42
 
-def foo(dll, f):
-    proto = ctypes.PYFUNCTYPE(ctypes.c_int, ctypes.c_float)
-    params = (1, "f"),
-    fn = proto(("foo", dll), params)
-    return fn(f)
 
-def main():
-    dll = ctypes.PyDLL("./demo.so")
-    # print(dll.foo(42)) # This can't pass floats, so gets printed as "0.0"
-    print(foo(dll, 42))
+# TODO: I'm not sure when we'd want to use this approach, instead of `dll.foo()`
+# def foo(dll, f):
+#     proto = ctypes.PYFUNCTYPE(ctypes.c_int, ctypes.c_float)
+#     params = (1, "f"),
+#     fn = proto(("foo", dll), params)
+#     return fn(f)
 
 if __name__ == "__main__":
     main()
