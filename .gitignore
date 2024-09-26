@@ -7,3 +7,4 @@ demo.so
 log.log
 mini.out
 foo.so
+*.pyc

@@ -1,32 +1,27 @@
-// clang demo.c -shared -o demo.so -I/usr/include/python3.10 -lpython3.10 -fPIE -g
-
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
+#include <assert.h>
+
 int bar(void) {
-  // This works
-  printf("Py_GetPath(): %ls\n", Py_GetPath());
+	PyObject *myModule = PyImport_ImportModule("main");
+	assert(myModule);
 
-  // This segfaults
-  PyObject *myModuleString = PyUnicode_FromString("a");
+	PyObject *myFunction = PyObject_GetAttrString(myModule, "bar");
+	assert(myFunction);
 
-  // printf("myModuleString: %p\n", (void *)myModuleString);
+	PyObject *args = PyTuple_Pack(0);
+	assert(args);
 
-  // printf("Calling PyObject_Print()...\n");
-  // int flags = Py_PRINT_RAW;
-  // PyObject_Print(myModuleString, stderr, flags);
-  // printf("Called PyObject_Print()!\n");
+	PyObject *myResult = PyObject_CallObject(myFunction, args);
+	assert(myResult);
 
-  // PyObject *myModule = PyImport_Import(myModuleString);
-  // PyObject *myFunction = PyObject_GetAttrString(myModule, "bar");
-  // PyObject *args = PyTuple_Pack(0);
-  // PyObject *myResult = PyObject_CallObject(myFunction, args);
-  // return PyFloat_AsDouble(myResult);
-
-  // return 42;
-  return 0;
+	// In newer versions of Python, this function is identical,
+	// but doesn't start with an underscore:
+	// https://github.com/python/cpython/commit/be436e08b8bd9fcd2202d6ce4d924bba7551e96f
+	return _PyLong_AsInt(myResult);
 }
 
 int foo(void) {
-  return bar();
+	return bar();
 }
