@@ -1,3 +1,4 @@
+# python3 demo.py
 # gdb --args python3 demo.py
 
 import ctypes
@@ -5,7 +6,7 @@ import ctypes
 def bar():
     return 42
 
-dll = ctypes.PyDLL("./demo.so")
+dll = ctypes.CDLL("./demo.so")
 
 def foo():
     proto = ctypes.CFUNCTYPE(ctypes.c_int)
@@ -13,7 +14,5 @@ def foo():
     api = proto(("foo", dll), params)
 
     return api()
-
-print(dll)
 
 print(foo())

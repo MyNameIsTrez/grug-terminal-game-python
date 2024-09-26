@@ -8,7 +8,7 @@ void exec_pycode(const char *code) {
 
 	PyRun_SimpleString(code);
 
-	PyObject *myModuleString = PyUnicode_FromString((char *)"demo");
+	PyObject *myModuleString = PyUnicode_FromString((char *)"a");
 	int flags = Py_PRINT_RAW;
 	PyObject_Print(myModuleString, stderr, flags);
 
