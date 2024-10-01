@@ -1,24 +1,35 @@
-# clang demo.c -shared -o demo.so -I/usr/include/python3.12 -lpython3.12 -fPIE -g && python3 main.py
+# clang demo.c -o demo.so -shared -fPIE -g && clang middle.c -o middle.so -shared -I/usr/include/python3.10 -lpython3.10 -fPIE -g && python3 main.py
 
 import ctypes
 
 
 def main():
-    dll = ctypes.PyDLL("./demo.so")
-    print(dll.foo(ctypes.c_float(42)))
-    # print(foo(dll, 42))
+    dll = ctypes.PyDLL("./middle.so")
+
+    dll.init()
+    print(dll.run(ctypes.c_float(42)))
+
+    # init(dll)
+    # print(run(dll, ctypes.c_float(42)))
 
 
 def bar():
     return 42
 
 
-# TODO: I'm not sure when we'd want to use this approach, instead of `dll.foo()`
-# def foo(dll, f):
+# TODO: I'm not sure when we'd want to use this approach, instead of `dll.init()`
+# def init(dll):
+#     proto = ctypes.PYFUNCTYPE(None)
+#     fn = proto(("init", dll))
+#     fn()
+
+
+# TODO: I'm not sure when we'd want to use this approach, instead of `dll.run()`
+# def run(dll, f):
 #     proto = ctypes.PYFUNCTYPE(ctypes.c_int, ctypes.c_float)
 #     params = (1, "f"),
-#     fn = proto(("foo", dll), params)
-#     return fn(f)
+#     fn = proto(("run", dll), params)
+#     fn(f)
 
 if __name__ == "__main__":
     main()

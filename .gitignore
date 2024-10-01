@@ -5,6 +5,7 @@ a.exe
 a.out
 demo.so
 log.log
+middle.so
 mini.out
 foo.so
 *.pyc
