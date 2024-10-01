@@ -1,10 +1,10 @@
-# clang demo.c -o demo.so -shared -fPIE -g && clang middle.c -o middle.so -shared -I/usr/include/python3.10 -lpython3.10 -fPIE -g && python3 main.py
+# clang mod.c -o mod.so -shared -fPIE -g && clang wrapper.c -o wrapper.so -shared -I/usr/include/python3.10 -lpython3.10 -fPIE -g && python3 main.py
 
 import ctypes
 
 
 def main():
-    dll = ctypes.PyDLL("./middle.so")
+    dll = ctypes.PyDLL("./wrapper.so")
 
     dll.init()
     print(dll.run(ctypes.c_float(42)))

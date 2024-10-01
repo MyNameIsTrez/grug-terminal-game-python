@@ -1,11 +1,7 @@
 .vscode/c_cpp_properties.json
 .vscode/settings.json
 mod_dlls
-a.exe
-a.out
-demo.so
 log.log
-middle.so
-mini.out
-foo.so
+mod.so
+wrapper.so
 *.pyc
