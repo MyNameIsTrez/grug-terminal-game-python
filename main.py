@@ -16,7 +16,6 @@ def main():
 
 def game_fn_magic():
     print("Magic!")
-    return 42
 
 
 if __name__ == "__main__":
