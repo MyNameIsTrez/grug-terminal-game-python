@@ -1,35 +1,23 @@
-# clang mod.c -o mod.so -shared -fPIE -g && clang adapter.c -o adapter.so -shared -I/usr/include/python3.10 -lpython3.10 -fPIE -g && python3 main.py
+# clang mod.c -o mod.so -shared -fPIE -g && clang adapter.c -o adapter.so -shared -I/usr/include/python3.12 -lpython3.12 -fPIE -g && python3 main.py
 
 import ctypes
+import os
 
 
 def main():
-    dll = ctypes.PyDLL("./adapter.so")
+    adapter_dll = ctypes.PyDLL("./adapter.so", os.RTLD_GLOBAL)
 
-    dll.init()
-    print(dll.run(ctypes.c_float(42)))
+    adapter_dll.init()
 
-    # init(dll)
-    # print(run(dll, ctypes.c_float(42)))
+    mod_dll = ctypes.PyDLL("./mod.so")
+
+    mod_dll.on_foo()
 
 
-def bar():
+def game_fn_magic():
+    print("Magic!")
     return 42
 
-
-# TODO: I'm not sure when we'd want to use this approach, instead of `dll.init()`
-# def init(dll):
-#     proto = ctypes.PYFUNCTYPE(None)
-#     fn = proto(("init", dll))
-#     fn()
-
-
-# TODO: I'm not sure when we'd want to use this approach, instead of `dll.run()`
-# def run(dll, f):
-#     proto = ctypes.PYFUNCTYPE(ctypes.c_int, ctypes.c_float)
-#     params = (1, "f"),
-#     fn = proto(("run", dll), params)
-#     fn(f)
 
 if __name__ == "__main__":
     main()

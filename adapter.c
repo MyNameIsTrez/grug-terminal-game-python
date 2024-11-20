@@ -4,26 +4,20 @@
 #include <assert.h>
 
 static PyObject *module;
-static PyObject *bar;
-static PyObject *bar_args;
+
+static PyObject *game_fn_magic_handle;
+static PyObject *game_fn_magic_args;
 
 void init(void) {
 	module = PyImport_ImportModule("main");
 	assert(module);
 
-	bar = PyObject_GetAttrString(module, "bar");
-	assert(bar);
-
-	bar_args = PyTuple_Pack(0);
-	assert(bar_args);
+	game_fn_magic_handle = PyObject_GetAttrString(module, "game_fn_magic");
+	assert(game_fn_magic_handle);
+	game_fn_magic_args = PyTuple_Pack(0);
+	assert(game_fn_magic_args);
 }
 
-int run(float f) {
-	PyObject *result = PyObject_CallObject(bar, bar_args);
-	assert(result);
-
-	// In newer versions of Python, this function is identical,
-	// but doesn't start with an underscore:
-	// https://github.com/python/cpython/commit/be436e08b8bd9fcd2202d6ce4d924bba7551e96f
-	return f + _PyLong_AsInt(result);
+void game_fn_magic(void) {
+	PyObject_CallObject(game_fn_magic_handle, game_fn_magic_args);
 }
