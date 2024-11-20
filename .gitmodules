@@ -1,3 +1,6 @@
 [submodule "grug-adapter-for-python"]
 	path = grug-adapter-for-python
 	url = https://github.com/MyNameIsTrez/grug-adapter-for-python
+[submodule "grug"]
+	path = grug
+	url = https://github.com/MyNameIsTrez/grug

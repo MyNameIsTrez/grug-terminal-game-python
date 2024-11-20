@@ -1,88 +1,61 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "build with gcc",
-      "command": "gcc",
-      "type": "shell",
-      "args": [
-        "main.c",
-        "grug/grug.c",
-        "data.c",
-        "game/human.c",
-        "game/tool.c",
-        "-Wall",
-        "-Wextra",
-        "-Werror",
-        "-Wpedantic",
-        "-Wfatal-errors",
-        "-g",
-        "-I.",
-        "-Igrug",
-        "-rdynamic",
-        "-fsanitize=address,undefined",
-        "-no-pie",
-        "-DCONFIG_TRIPLET='\"x86_64-linux-gnu\"'",
-        "-DTCC_TARGET_X86_64",
-        "-DONE_SOURCE=0",
-        "-DTCC_GITHASH='\"2024-03-03 mob@9d2068c6*\"'",
-        "-fno-strict-aliasing",
-        "-Wno-pointer-sign",
-        "-Wno-sign-compare",
-        "-Wno-unused-result",
-        "-Wno-format-truncation",
-        "-Wno-stringop-truncation",
-        "-Wno-old-style-declaration",
-        "-Wno-overlength-strings",
-        "-Wno-implicit-fallthrough",
-        "-Wno-missing-field-initializers"
-      ],
-      "problemMatcher": ["$tsc"],
-      "presentation": {
-        "reveal": "always",
-        "clear": true
-      },
-      "group": "build"
-    },
-    {
-      "label": "build with clang",
-      "command": "clang",
-      "type": "shell",
-      "args": [
-        "main.c",
-        "grug/grug.c",
-        "data.c",
-        "game/human.c",
-        "-Wall",
-        "-Wextra",
-        "-Werror",
-        "-Wpedantic",
-        "-Wfatal-errors",
-        "-g",
-        "-I.",
-        "-Igrug",
-        "-rdynamic",
-        "-fsanitize=address,undefined",
-        "-no-pie",
-        "-DCONFIG_TRIPLET='\"x86_64-linux-gnu\"'",
-        "-DTCC_TARGET_X86_64",
-        "-DONE_SOURCE=0",
-        "-DTCC_GITHASH='\"2024-03-03 mob@9d2068c6*\"'",
-        "-fno-strict-aliasing",
-        "-Wno-pointer-sign",
-        "-Wno-sign-compare",
-        "-Wno-unused-result",
-        "-Wno-overlength-strings",
-        "-Wno-implicit-fallthrough",
-        "-Wno-missing-field-initializers",
-        "-Wno-language-extension-token"
-      ],
-      "problemMatcher": ["$tsc"],
-      "presentation": {
-        "reveal": "always",
-        "clear": true
-      },
-      "group": "build"
-    }
-  ]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile grug.so",
+            "command": "gcc",
+            "type": "shell",
+            "args": [
+                "grug/grug.c",
+                "-o",
+                "grug/grug.so",
+                "-shared",
+                "-fPIC",
+                "-Wall",
+                "-Wextra",
+                "-Werror",
+                "-Wpedantic",
+                "-Wfatal-errors",
+                "-g",
+                "-rdynamic",
+                // "-fsanitize=address,undefined",
+            ],
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "clear": true
+            },
+            "group": "build"
+        },
+        {
+            "label": "Compile adapter.so",
+            "command": "gcc",
+            "type": "shell",
+            "args": [
+                "adapter.c",
+                "-o",
+                "adapter.so",
+                "-shared",
+                "-I/usr/include/python3.12",
+                "-fPIE",
+                "-Wall",
+                "-Wextra",
+                "-Werror",
+                "-Wpedantic",
+                "-Wfatal-errors",
+                "-g",
+                // "-fsanitize=address,undefined",
+            ],
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "clear": true
+            },
+            "group": "build"
+        }
+    ]
 }

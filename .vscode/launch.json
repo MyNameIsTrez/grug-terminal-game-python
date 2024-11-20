@@ -2,28 +2,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python Debugger: Current File",
+      "name": "Launch",
       "type": "debugpy",
       "request": "launch",
-      "program": "${file}",
+      "program": "${workspaceRoot}/main.py",
       "console": "integratedTerminal",
-      "justMyCode": true
-    },
-    {
-      "name": "launch with gcc",
-      "type": "cppdbg",
-      "request": "launch",
-      "cwd": ".",
-      "program": "${workspaceRoot}/a.out",
-      "preLaunchTask": "build with gcc"
-    },
-    {
-      "name": "launch with clang",
-      "type": "cppdbg",
-      "request": "launch",
-      "cwd": ".",
-      "program": "${workspaceRoot}/a.out",
-      "preLaunchTask": "build with clang"
+      "justMyCode": false
     }
   ]
 }
