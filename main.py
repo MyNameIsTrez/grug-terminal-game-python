@@ -2,15 +2,8 @@ import ctypes
 import os
 import sys
 import time
-from dataclasses import dataclass
-
-
-@dataclass
-class Human:
-    name: str
-    health: int
-    buy_gold_value: int
-    kill_gold_value: int
+from dataclasses import dataclass, field
+from enum import Enum, auto
 
 
 class GrugError(ctypes.Structure):
@@ -22,12 +15,84 @@ class GrugError(ctypes.Structure):
     ]
 
 
-def game_fn_magic():
-    print("Magic!")
+class GrugFile(ctypes.Structure):
+    _fields_ = [
+        ("name", ctypes.c_char_p),
+        ("dll", ctypes.c_void_p),
+        (
+            "define_fn",
+            ctypes.PYFUNCTYPE(None),
+        ),  # The first None means return void, the second None means no args
+        ("globals_size", ctypes.c_size_t),
+        ("init_globals_fn", ctypes.PYFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)),
+        ("define_type", ctypes.c_char_p),
+        ("on_fns", ctypes.c_void_p),
+        ("resource_mtimes", ctypes.POINTER(ctypes.c_int64)),
+    ]
 
+
+@dataclass
+class Human:
+    name: str
+    health: int
+    buy_gold_value: int
+    kill_gold_value: int
+
+    # These are not initialized by mods
+    id: int
+    opponent_id: int
+    max_health: int
+
+
+@dataclass
+class Tool:
+    name: str
+    buy_gold_value: int
+
+    # These are not initialized by mods
+    human_parent_id: int
+    # TODO: Add `tool_on_fns *on_fns;`
+
+
+class State(Enum):
+    STATE_PICKING_PLAYER = auto()
+    STATE_PICKING_TOOLS = auto()
+    STATE_PICKING_OPPONENT = auto()
+    STATE_FIGHTING = auto()
+
+
+@dataclass
+class Data:
+    state: State = State.STATE_PICKING_PLAYER
+    type_files: list[GrugFile] = field(default_factory=list)
+    gold: int = 400
+
+    humans: list[Human] = field(default_factory=list)
+    human_dlls: list[ctypes.c_void_p] = field(default_factory=list)
+    human_globals: list[ctypes.c_void_p] = field(default_factory=list)
+
+    tools: list[Tool] = field(default_factory=list)
+    tool_dlls: list[ctypes.c_void_p] = field(default_factory=list)
+    tool_globals: list[ctypes.c_void_p] = field(default_factory=list)
+
+    player_has_human: bool = False
+    player_has_tool: bool = False
+
+
+data = Data()
 
 # TODO: Try simplifying this line
 human_definition: Human = None
+
+
+def game_fn_get_opponent(human_id):
+    global data
+    assert human_id < 2
+    return data.humans[human_id].opponent_id
+
+
+def game_fn_magic():
+    print("Magic!")
 
 
 def game_fn_define_human(name, health, buy_gold_value, kill_gold_value):
