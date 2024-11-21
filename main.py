@@ -81,23 +81,43 @@ class Data:
 
 data = Data()
 
-# TODO: Try simplifying this line
+# TODO: Try simplifying these lines
 human_definition: Human = None
-
-
-def game_fn_get_opponent(human_id):
-    global data
-    assert human_id < 2
-    return data.humans[human_id].opponent_id
+tool_definition: Tool = None
 
 
 def game_fn_magic():
     print("Magic!")
 
 
+def game_fn_get_opponent(human_id):
+    assert human_id < 2
+    return data.humans[human_id].opponent_id
+
+
+def clamp(n, lowest, highest):
+    return max(lowest, min(highest, n))
+
+
+def game_fn_change_human_health(id, added_health):
+    assert id < 2
+    human = data.humans[id]
+    human.health = clamp(human.health + added_health, 0, human.max_health)
+
+
+def game_fn_get_human_parent(tool_id):
+    assert tool_id < 2
+    return data.tools[tool_id].human_parent_id
+
+
 def game_fn_define_human(name, health, buy_gold_value, kill_gold_value):
     global human_definition
     human_definition = Human(name, health, buy_gold_value, kill_gold_value)
+
+
+def game_fn_define_tool(name, buy_gold_value):
+    global tool_definition
+    tool_definition = Tool(name, buy_gold_value)
 
 
 @ctypes.CFUNCTYPE(None, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p)
