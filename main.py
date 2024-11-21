@@ -19,9 +19,9 @@ class GrugFile(ctypes.Structure):
     _fields_ = [
         ("name", ctypes.c_char_p),
         ("dll", ctypes.c_void_p),
-        ("define_fn", ctypes.PYFUNCTYPE(None)),  # The None means it returns void
+        ("define_fn", ctypes.CFUNCTYPE(None)),  # The None means it returns void
         ("globals_size", ctypes.c_size_t),
-        ("init_globals_fn", ctypes.PYFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)),
+        ("init_globals_fn", ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)),
         ("define_type", ctypes.c_char_p),
         ("on_fns", ctypes.c_void_p),
         ("resource_mtimes", ctypes.POINTER(ctypes.c_int64)),
@@ -55,7 +55,7 @@ class GrugModified(ctypes.Structure):
 
 class ToolOnFns(ctypes.Structure):
     _fields_ = [
-        ("use", ctypes.PYFUNCTYPE(None, ctypes.c_void_p)),
+        ("use", ctypes.CFUNCTYPE(None, ctypes.c_void_p)),
     ]
 
 
