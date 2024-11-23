@@ -19,7 +19,8 @@ class GrugFile(ctypes.Structure):
     _fields_ = [
         ("name", ctypes.c_char_p),
         ("dll", ctypes.c_void_p),
-        ("define_fn", ctypes.CFUNCTYPE(None)),  # The None means it returns void
+        ("define_fn", ctypes.PYFUNCTYPE(None)),  # The None means it returns void
+        # ("define_fn", ctypes.c_void_p),  # TODO: Add the old CFUNCTYPE thing back
         ("globals_size", ctypes.c_size_t),
         ("init_globals_fn", ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)),
         ("define_type", ctypes.c_char_p),
@@ -67,9 +68,9 @@ class Human:
     kill_gold_value: int
 
     # These are not initialized by mods
-    id: int
-    opponent_id: int
-    max_health: int
+    id: int = -1
+    opponent_id: int = -1
+    max_health: int = -1
 
 
 @dataclass
@@ -121,6 +122,7 @@ data = Data(
 
 # TODO: Try simplifying these lines
 human_definition: Human = None
+foo = 42
 tool_definition: Tool = None
 grug_dll = None
 
@@ -151,7 +153,13 @@ def game_fn_get_human_parent(tool_id):
 
 def game_fn_define_human(name, health, buy_gold_value, kill_gold_value):
     global human_definition
+    global foo
+    print("game_fn_define_human() was called!")
     human_definition = Human(name, health, buy_gold_value, kill_gold_value)
+    print(human_definition)
+    print(foo)
+    foo = 69
+    print(foo)
 
 
 def game_fn_define_tool(name, buy_gold_value):
@@ -213,8 +221,48 @@ def pick_tools():
 
 
 def print_playable_humans(files_defining_human):
+    # global human_definition
+    # print(human_definition)
+
     for i in range(len(data.type_files)):
+        # TODO: REMOVE!
+        # mage_dll = ctypes.PyDLL("mod_dlls/magic/mage.so")
+        # define = mage_dll.define
+        # define.restype = None
+        # define()
+
+        # TODO: REMOVE
+        # parent = ctypes.CDLL(None)
+        # dlopen = parent.dlopen
+        # dlopen.restype = ctypes.c_void_p
+        # dlsym = parent.dlsym
+        # dlsym.restype = ctypes.c_void_p
+        # print(ctypes.c_char_p(parent.dlerror()).value)
+        # lib = dlopen(b"mod_dlls/magic/mage.so", os.RTLD_NOW)
+        # if not lib:
+        #     print(ctypes.c_char_p(parent.dlerror()).value)
+        #     sys.exit(1)
+        # define = parent.dlsym(lib, b"define")
+        # if not define:
+        #     print(ctypes.c_char_p(parent.dlerror()).value)
+        #     sys.exit(1)
+        # FUNKY = ctypes.PYFUNCTYPE(None)
+        # # TODO: It is very strange that calling this crashes after printing 'x1'!
+        # # TODO: I suspect the issue has to do with the GIL?
+        # FUNKY(define)()
+
+        # TODO: This does not work, for some reason
+        # asd = ctypes.PYFUNCTYPE(None)(files_defining_human[i].define_fn)
+        # asd()
+
         files_defining_human[i].define_fn()
+        print("lmao")
+        global human_definition
+        print(human_definition)
+        global foo
+        # TODO: This printing 42 instead of 123 seems to be caused by
+        # TODO: adapter.c re-importing main, which maybe instances a new Python interpreter?
+        print(foo)
         human = human_definition
         print(f"{i + 1}. {human.name}, costing {human.buy_gold_value} gold")
 
@@ -328,8 +376,14 @@ def runtime_error_handler(reason, type, on_fn_name, on_fn_path):
 def main():
     global grug_dll
 
+    # TODO: REMOVE
+    global foo
+    foo = 123
+
     # RTLD_GLOBAL here allows mods to call functions from adapter.c
     adapter_dll = ctypes.PyDLL("./adapter.so", os.RTLD_GLOBAL)
+
+    adapter_dll.init.restype = None
     adapter_dll.init()
 
     # RTLD_GLOBAL here mods to access grug_runtime_error_type from grug.c
