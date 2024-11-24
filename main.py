@@ -134,9 +134,9 @@ def clamp(n, lowest, highest):
     return max(lowest, min(highest, n))
 
 
-def game_fn_change_human_health(id, added_health):
-    assert id < 2
-    human = data.humans[id]
+def game_fn_change_human_health(human_id, added_health):
+    assert human_id < 2
+    human = data.humans[human_id]
     human.health = clamp(human.health + added_health, 0, human.max_health)
 
 
@@ -147,12 +147,12 @@ def game_fn_get_human_parent(tool_id):
 
 def game_fn_define_human(name, health, buy_gold_value, kill_gold_value):
     global human_definition
-    human_definition = Human(name.decode(), health, buy_gold_value, kill_gold_value)
+    human_definition = Human(name, health, buy_gold_value, kill_gold_value)
 
 
 def game_fn_define_tool(name, buy_gold_value):
     global tool_definition
-    tool_definition = Tool(name.decode(), buy_gold_value)
+    tool_definition = Tool(name, buy_gold_value)
 
 
 def get_type_files_impl(dir: GrugModDir, define_type):

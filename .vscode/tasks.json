@@ -30,6 +30,26 @@
             "group": "build"
         },
         {
+            "label": "Regenerate adapter.c, and compile adapter.so",
+            "dependsOn": [
+                "Regenerate adapter.c",
+                "Compile adapter.so"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "Regenerate adapter.c",
+            "command": "python3",
+            "args": [
+                "grug-adapter-for-python/generate.py",
+                "mod_api.json",
+                "adapter.c"
+            ],
+            "hide": true
+        },
+        {
             "label": "Compile adapter.so",
             "command": "gcc",
             "type": "shell",
@@ -62,7 +82,7 @@
                 "reveal": "always",
                 "clear": true
             },
-            "group": "build"
+            "hide": true
         }
     ]
 }

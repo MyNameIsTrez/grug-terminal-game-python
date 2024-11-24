@@ -1,6 +1,7 @@
 .vscode/c_cpp_properties.json
 .vscode/settings.json
 mod_dlls
+adapter.c
 adapter.so
 log.log
 mod.so
