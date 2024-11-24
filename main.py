@@ -510,12 +510,10 @@ def main():
 
     grug_dll.grug_regenerate_modified_mods.restype = ctypes.c_bool
 
+    error = GrugError.in_dll(grug_dll, "grug_error")
+
     while True:
         if grug_dll.grug_regenerate_modified_mods():
-            # TODO: Try getting a ptr to this global only once,
-            # before this while-loop
-            error = GrugError.in_dll(grug_dll, "grug_error")
-
             if error.has_changed:
                 print(
                     f"grug loading error: {error.msg.decode()}, in {error.path.decode()} (detected in grug.c:{error.grug_c_line_number})",
