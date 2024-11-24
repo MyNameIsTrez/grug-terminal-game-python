@@ -20,7 +20,6 @@ class GrugFile(ctypes.Structure):
         ("name", ctypes.c_char_p),
         ("dll", ctypes.c_void_p),
         ("define_fn", ctypes.PYFUNCTYPE(None)),  # The None means it returns void
-        # ("define_fn", ctypes.c_void_p),  # TODO: Add the old CFUNCTYPE thing back
         ("globals_size", ctypes.c_size_t),
         ("init_globals_fn", ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)),
         ("define_type", ctypes.c_char_p),
@@ -152,7 +151,6 @@ def game_fn_get_human_parent(tool_id):
 
 def game_fn_define_human(name, health, buy_gold_value, kill_gold_value):
     global human_definition
-    # print("game_fn_define_human() was called!")
     human_definition = Human(name, health, buy_gold_value, kill_gold_value)
 
 
@@ -198,7 +196,7 @@ def read_size(prompt):
     return age
 
 
-def pick_opponent_humans(files_defining_human):
+def print_opponent_humans(files_defining_human):
     pass
 
 
@@ -206,60 +204,84 @@ def pick_opponent():
     pass
 
 
-def print_tools():
-    pass
+def print_tools(files_defining_tool):
+    global tool_definition
+
+    for i, file in enumerate(files_defining_tool):
+        file.define_fn()
+        tool = tool_definition
+        print(f"{i + 1}. {tool.name.decode()}, costing {tool.buy_gold_value} gold")
+
+    print("")
 
 
 def pick_tools():
-    pass
+    print(f"You have {data.gold} gold\n")
+
+    files_defining_tool = get_type_files("tool")
+
+    print_tools(files_defining_tool)
+
+    tool_number = read_size(
+        f"Type the number next to the tool you want to buy{" (type 0 to skip)" if data.player_has_tool else ""}:\n"
+    )
+    if tool_number == None:
+        return
+
+    if tool_number == 0:
+        if data.player_has_tool:
+            data.state = State.PICKING_OPPONENT
+            return
+
+        print("The minimum number you can enter is 1", file=sys.stderr)
+        return
+
+    if tool_number > len(files_defining_tool):
+        print(
+            f"The maximum number you can enter is {len(files_defining_tool)}",
+            file=sys.stderr,
+        )
+        return
+
+    tool_index = tool_number - 1
+
+    file = files_defining_tool[tool_index]
+
+    file.define_fn()
+    tool = tool_definition
+
+    tool.on_fns = file.on_fns
+
+    if tool.buy_gold_value > data.gold:
+        print("You don't have enough gold to pick that tool", file=sys.stderr)
+        return
+
+    data.gold -= tool.buy_gold_value
+
+    tool.human_parent_id = PLAYER_INDEX
+
+    data.tools[PLAYER_INDEX] = tool
+    data.tool_dlls[PLAYER_INDEX] = file.dll
+
+    data.tool_globals[PLAYER_INDEX] = (ctypes.c_byte * file.globals_size)()
+    file.init_globals_fn(data.tool_globals[PLAYER_INDEX], PLAYER_INDEX)
+
+    data.player_has_tool = True
 
 
 def print_playable_humans(files_defining_human):
-    # global human_definition
-    # print(human_definition)
+    global human_definition
 
-    for i in range(len(data.type_files)):
-        # TODO: REMOVE!
-        # mage_dll = ctypes.PyDLL("mod_dlls/magic/mage.so")
-        # define = mage_dll.define
-        # define.restype = None
-        # define()
-
-        # TODO: REMOVE
-        # parent = ctypes.CDLL(None)
-        # dlopen = parent.dlopen
-        # dlopen.restype = ctypes.c_void_p
-        # dlsym = parent.dlsym
-        # dlsym.restype = ctypes.c_void_p
-        # print(ctypes.c_char_p(parent.dlerror()).value)
-        # lib = dlopen(b"mod_dlls/magic/mage.so", os.RTLD_NOW)
-        # if not lib:
-        #     print(ctypes.c_char_p(parent.dlerror()).value)
-        #     sys.exit(1)
-        # define = parent.dlsym(lib, b"define")
-        # if not define:
-        #     print(ctypes.c_char_p(parent.dlerror()).value)
-        #     sys.exit(1)
-        # FUNKY = ctypes.PYFUNCTYPE(None)
-        # # TODO: It is very strange that calling this crashes after printing 'x1'!
-        # # TODO: I suspect the issue has to do with the GIL?
-        # FUNKY(define)()
-
-        # TODO: This does not work, for some reason
-        # asd = ctypes.PYFUNCTYPE(None)(files_defining_human[i].define_fn)
-        # asd()
-
-        files_defining_human[i].define_fn()
-        global human_definition
-        print(human_definition)
+    for i, file in enumerate(files_defining_human):
+        file.define_fn()
         human = human_definition
-        print(f"{i + 1}. {human.name}, costing {human.buy_gold_value} gold")
+        print(f"{i + 1}. {human.name.decode()}, costing {human.buy_gold_value} gold")
 
     print("")
 
 
 def pick_player():
-    print(f"You have {data.gold}\n")
+    print(f"You have {data.gold} gold\n")
 
     files_defining_human = get_type_files("human")
 
@@ -279,9 +301,9 @@ def pick_player():
         print("The minimum number you can enter is 1", file=sys.stderr)
         return
 
-    if player_number > data.type_files_size:
+    if player_number > len(files_defining_human):
         print(
-            f"The maximum number you can enter is {len(data.type_files)}",
+            f"The maximum number you can enter is {len(files_defining_human)}",
             file=sys.stderr,
         )
         return
