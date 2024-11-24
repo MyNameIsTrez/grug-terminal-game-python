@@ -120,7 +120,6 @@ data = Data(
     tool_globals=[None, None],
 )
 
-# TODO: Try simplifying these lines
 human_definition: Human = None
 tool_definition: Tool = None
 grug_dll = None
