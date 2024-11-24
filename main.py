@@ -511,13 +511,23 @@ def main():
 
     error = GrugError.in_dll(grug_dll, "grug_error")
 
+    loading_error_in_grug_file = ctypes.c_bool.in_dll(
+        grug_dll, "grug_loading_error_in_grug_file"
+    )
+
     while True:
         if grug_dll.grug_regenerate_modified_mods():
             if error.has_changed:
-                print(
-                    f"grug loading error: {error.msg.decode()}, in {error.path.decode()} (detected in grug.c:{error.grug_c_line_number})",
-                    file=sys.stderr,
-                )
+                if loading_error_in_grug_file:
+                    print(
+                        f"grug loading error: {error.msg.decode()}, in {error.path.decode()} (detected in grug.c:{error.grug_c_line_number})",
+                        file=sys.stderr,
+                    )
+                else:
+                    print(
+                        f"grug loading error: {error.msg.decode()} (detected in grug.c:{error.grug_c_line_number})",
+                        file=sys.stderr,
+                    )
 
             time.sleep(1)
 
