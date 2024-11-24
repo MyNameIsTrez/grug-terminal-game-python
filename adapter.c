@@ -9,7 +9,6 @@ typedef uint64_t id;
 
 static PyObject *main_module;
 
-static PyObject *game_fn_magic_handle;
 static PyObject *game_fn_get_opponent_handle;
 static PyObject *game_fn_change_human_health_handle;
 static PyObject *game_fn_get_human_parent_handle;
@@ -33,17 +32,17 @@ void init(void) {
 	CHECK_PYTHON_ERROR();
 	assert(main_module);
 
-	game_fn_magic_handle = PyObject_GetAttrString(main_module, "game_fn_magic");
+	game_fn_get_opponent_handle = PyObject_GetAttrString(main_module, "game_fn_get_opponent");
 	CHECK_PYTHON_ERROR();
-	assert(game_fn_magic_handle);
+	assert(game_fn_get_opponent_handle);
 
 	game_fn_change_human_health_handle = PyObject_GetAttrString(main_module, "game_fn_change_human_health");
 	CHECK_PYTHON_ERROR();
 	assert(game_fn_change_human_health_handle);
 
-	game_fn_get_opponent_handle = PyObject_GetAttrString(main_module, "game_fn_get_opponent");
+	game_fn_get_human_parent_handle = PyObject_GetAttrString(main_module, "game_fn_get_human_parent");
 	CHECK_PYTHON_ERROR();
-	assert(game_fn_get_opponent_handle);
+	assert(game_fn_get_human_parent_handle);
 
 	game_fn_define_human_handle = PyObject_GetAttrString(main_module, "game_fn_define_human");
 	CHECK_PYTHON_ERROR();
@@ -52,14 +51,6 @@ void init(void) {
 	game_fn_define_tool_handle = PyObject_GetAttrString(main_module, "game_fn_define_tool");
 	CHECK_PYTHON_ERROR();
 	assert(game_fn_define_tool_handle);
-}
-
-void game_fn_magic(void) {
-	PyObject *args = PyTuple_Pack(0);
-	assert(args);
-
-	PyObject *result = PyObject_CallObject(game_fn_magic_handle, args);
-	assert(result);
 }
 
 id game_fn_get_opponent(id human_id) {

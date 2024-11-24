@@ -1,5 +1,6 @@
 import ctypes
 import os
+import random
 import sys
 import time
 from dataclasses import dataclass, field
@@ -21,7 +22,7 @@ class GrugFile(ctypes.Structure):
         ("dll", ctypes.c_void_p),
         ("define_fn", ctypes.PYFUNCTYPE(None)),  # The None means it returns void
         ("globals_size", ctypes.c_size_t),
-        ("init_globals_fn", ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)),
+        ("init_globals_fn", ctypes.PYFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)),
         ("define_type", ctypes.c_char_p),
         ("on_fns", ctypes.c_void_p),
         ("resource_mtimes", ctypes.POINTER(ctypes.c_int64)),
@@ -55,7 +56,7 @@ class GrugModified(ctypes.Structure):
 
 class ToolOnFns(ctypes.Structure):
     _fields_ = [
-        ("use", ctypes.CFUNCTYPE(None, ctypes.c_void_p)),
+        ("use", ctypes.PYFUNCTYPE(None, ctypes.c_void_p)),
     ]
 
 
@@ -75,11 +76,11 @@ class Human:
 @dataclass
 class Tool:
     name: str = ""
-    buy_gold_value: int = 0
+    buy_gold_value: int = -1
 
     # These are not initialized by mods
     human_parent_id: int = 0
-    on_fns = None
+    on_fns: ToolOnFns = None
 
 
 class State(Enum):
@@ -125,10 +126,6 @@ tool_definition: Tool = None
 grug_dll = None
 
 
-def game_fn_magic():
-    print("Magic!")
-
-
 def game_fn_get_opponent(human_id):
     assert human_id < 2
     return data.humans[human_id].opponent_id
@@ -151,12 +148,12 @@ def game_fn_get_human_parent(tool_id):
 
 def game_fn_define_human(name, health, buy_gold_value, kill_gold_value):
     global human_definition
-    human_definition = Human(name, health, buy_gold_value, kill_gold_value)
+    human_definition = Human(name.decode(), health, buy_gold_value, kill_gold_value)
 
 
 def game_fn_define_tool(name, buy_gold_value):
     global tool_definition
-    tool_definition = Tool(name, buy_gold_value)
+    tool_definition = Tool(name.decode(), buy_gold_value)
 
 
 def get_type_files_impl(dir: GrugModDir, define_type):
@@ -179,7 +176,49 @@ def get_type_files(define_type):
 
 
 def fight():
-    pass
+    player = data.humans[PLAYER_INDEX]
+    opponent = data.humans[OPPONENT_INDEX]
+
+    player_tool_globals = data.tool_globals[PLAYER_INDEX]
+    opponent_tool_globals = data.tool_globals[OPPONENT_INDEX]
+
+    player_tool = data.tools[PLAYER_INDEX]
+    opponent_tool = data.tools[OPPONENT_INDEX]
+
+    print(f"You have {player.health} health")
+    print(f"The opponent has {opponent.health} health\n")
+
+    use = player_tool.on_fns.use
+    if use:
+        print(f"You use your {player_tool.name}")
+        use(player_tool_globals)
+        time.sleep(1)
+    else:
+        print(f"You don't know what to do with your {player_tool.name}")
+        time.sleep(1)
+
+    if opponent.health <= 0:
+        print("The opponent died!")
+        time.sleep(1)
+        data.state = State.PICKING_PLAYER
+        data.gold += opponent.kill_gold_value
+        player.health = player.max_health
+        return
+
+    use = opponent_tool.on_fns.use
+    if use:
+        print(f"The opponent uses their {opponent_tool.name}")
+        use(opponent_tool_globals)
+        time.sleep(1)
+    else:
+        print(f"The opponent doesn't know what to do with their {opponent_tool.name}")
+        time.sleep(1)
+
+    if player.health <= 0:
+        print("You died!")
+        time.sleep(1)
+        data.state = State.PICKING_PLAYER
+        player.health = player.max_health
 
 
 def read_size(prompt):
@@ -197,11 +236,78 @@ def read_size(prompt):
 
 
 def print_opponent_humans(files_defining_human):
-    pass
+    global human_definition
+
+    for i, file in enumerate(files_defining_human):
+        file.define_fn()
+        human = human_definition
+        print(f"{i + 1}. {human.name}, worth {human.kill_gold_value} gold when killed")
+
+    print("")
 
 
 def pick_opponent():
-    pass
+    print(f"You have {data.gold} gold\n")
+
+    files_defining_human = get_type_files("human")
+
+    print_opponent_humans(files_defining_human)
+
+    opponent_number = read_size(
+        f"Type the number next to the human you want to fight:\n"
+    )
+    if opponent_number == None:
+        return
+
+    if opponent_number == 0:
+        print("The minimum number you can enter is 1", file=sys.stderr)
+        return
+
+    if opponent_number > len(files_defining_human):
+        print(
+            f"The maximum number you can enter is {len(files_defining_human)}",
+            file=sys.stderr,
+        )
+        return
+
+    opponent_index = opponent_number - 1
+
+    file = files_defining_human[opponent_index]
+
+    file.define_fn()
+    human = human_definition
+
+    human.id = OPPONENT_INDEX
+    human.opponent_id = PLAYER_INDEX
+
+    human.max_health = human.health
+
+    data.humans[OPPONENT_INDEX] = human
+    data.human_dlls[OPPONENT_INDEX] = file.dll
+
+    data.human_globals[OPPONENT_INDEX] = (ctypes.c_byte * file.globals_size)()
+    file.init_globals_fn(data.human_globals[OPPONENT_INDEX], OPPONENT_INDEX)
+
+    # Give the opponent a random tool
+    files_defining_tool = get_type_files("tool")
+    tool_index = random.randrange(len(files_defining_tool))
+
+    file = files_defining_tool[tool_index]
+
+    file.define_fn()
+    tool = tool_definition
+
+    tool.on_fns = ToolOnFns.from_address(file.on_fns)
+
+    tool.human_parent_id = OPPONENT_INDEX
+
+    data.tools[OPPONENT_INDEX] = tool
+    data.tool_dlls[OPPONENT_INDEX] = file.dll
+
+    data.tool_globals[OPPONENT_INDEX] = (ctypes.c_byte * file.globals_size)()
+    file.init_globals_fn(data.tool_globals[OPPONENT_INDEX], OPPONENT_INDEX)
+
+    data.state = State.FIGHTING
 
 
 def print_tools(files_defining_tool):
@@ -210,7 +316,7 @@ def print_tools(files_defining_tool):
     for i, file in enumerate(files_defining_tool):
         file.define_fn()
         tool = tool_definition
-        print(f"{i + 1}. {tool.name.decode()}, costing {tool.buy_gold_value} gold")
+        print(f"{i + 1}. {tool.name}, costing {tool.buy_gold_value} gold")
 
     print("")
 
@@ -250,7 +356,7 @@ def pick_tools():
     file.define_fn()
     tool = tool_definition
 
-    tool.on_fns = file.on_fns
+    tool.on_fns = ToolOnFns.from_address(file.on_fns)
 
     if tool.buy_gold_value > data.gold:
         print("You don't have enough gold to pick that tool", file=sys.stderr)
@@ -275,7 +381,7 @@ def print_playable_humans(files_defining_human):
     for i, file in enumerate(files_defining_human):
         file.define_fn()
         human = human_definition
-        print(f"{i + 1}. {human.name.decode()}, costing {human.buy_gold_value} gold")
+        print(f"{i + 1}. {human.name}, costing {human.buy_gold_value} gold")
 
     print("")
 
@@ -373,13 +479,15 @@ def reload_modified_entities():
                 data.tool_globals[i] = (ctypes.c_byte * file.globals_size)()
                 file.init_globals_fn(data.tool_globals[i], i)
 
-                data.tools[i].on_fns = file.on_fns
+                data.tools[i].on_fns = (
+                    ToolOnFns.from_address(file.on_fns) if file.on_fns else None
+                )
 
 
 @ctypes.CFUNCTYPE(None, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p)
 def runtime_error_handler(reason, type, on_fn_name, on_fn_path):
     print(
-        f"grug runtime error in {on_fn_name}(): {reason}, in {on_fn_path}",
+        f"grug runtime error in {on_fn_name.decode()}(): {reason.decode()}, in {on_fn_path.decode()}",
         file=sys.stderr,
     )
 
