@@ -48,19 +48,11 @@
                 // "-fsanitize=address,undefined",
                 // Generate the below strings using `python3-config --includes --ldflags`
                 // It's explained here: https://www.linuxjournal.com/article/8497
-                // "-lpython3.12",
-                // "-I/usr/include/python3.12",
-                // "-L/usr/lib/python3.12/config-3.12-x86_64-linux-gnu",
-                // "-L/usr/lib/x86_64-linux-gnu",
-                // "-ldl",
-                // "-lm",
-                //
-                "-lpython3.11",
-                "-I/home/trez/.pyenv/versions/3.11.10/include/python3.11",
-                "-L/home/trez/.pyenv/versions/3.11.10/lib",
+                "-lpython3.13",
+                "-I/home/trez/.pyenv/versions/3.13.0/include/python3.13",
+                "-L/home/trez/.pyenv/versions/3.13.0/lib",
                 "-ldl",
-                "-L/home/trez/.pyenv/versions/3.11.10/lib",
-                "-Wl,-rpath,/home/trez/.pyenv/versions/3.11.10/lib",
+                "-Wl,-rpath,/home/trez/.pyenv/versions/3.13.0/lib",
                 "-lm",
             ],
             "problemMatcher": [

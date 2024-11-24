@@ -122,7 +122,6 @@ data = Data(
 
 # TODO: Try simplifying these lines
 human_definition: Human = None
-foo = 42
 tool_definition: Tool = None
 grug_dll = None
 
@@ -153,13 +152,8 @@ def game_fn_get_human_parent(tool_id):
 
 def game_fn_define_human(name, health, buy_gold_value, kill_gold_value):
     global human_definition
-    global foo
-    print("game_fn_define_human() was called!")
+    # print("game_fn_define_human() was called!")
     human_definition = Human(name, health, buy_gold_value, kill_gold_value)
-    print(human_definition)
-    print(foo)
-    foo = 69
-    print(foo)
 
 
 def game_fn_define_tool(name, buy_gold_value):
@@ -256,13 +250,8 @@ def print_playable_humans(files_defining_human):
         # asd()
 
         files_defining_human[i].define_fn()
-        print("lmao")
         global human_definition
         print(human_definition)
-        global foo
-        # TODO: This printing 42 instead of 123 seems to be caused by
-        # TODO: adapter.c re-importing main, which maybe instances a new Python interpreter?
-        print(foo)
         human = human_definition
         print(f"{i + 1}. {human.name}, costing {human.buy_gold_value} gold")
 
@@ -375,10 +364,6 @@ def runtime_error_handler(reason, type, on_fn_name, on_fn_path):
 
 def main():
     global grug_dll
-
-    # TODO: REMOVE
-    global foo
-    foo = 123
 
     # RTLD_GLOBAL here allows mods to call functions from adapter.c
     adapter_dll = ctypes.PyDLL("./adapter.so", os.RTLD_GLOBAL)
