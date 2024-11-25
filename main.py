@@ -500,7 +500,7 @@ def main():
     adapter_dll.init.restype = None
     adapter_dll.init()
 
-    # RTLD_GLOBAL here mods to access grug_runtime_error_type from grug.c
+    # RTLD_GLOBAL here allows mods to access grug_runtime_error_type from grug.c
     grug_dll = ctypes.PyDLL("./grug/grug.so", os.RTLD_GLOBAL)
 
     grug_dll.grug_set_runtime_error_handler.restype = None
