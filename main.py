@@ -459,8 +459,8 @@ def reload_modified_entities():
     reloads_type = GrugModified * 6969
     reloads = reloads_type.in_dll(grug_dll, "grug_reloads")
 
-    for i in range(reloads_size):
-        reload = reloads[i]
+    for reload_index in range(reloads_size):
+        reload = reloads[reload_index]
 
         file = reload.file.contents
 
