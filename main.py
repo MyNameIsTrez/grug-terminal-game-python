@@ -50,7 +50,7 @@ class GrugModified(ctypes.Structure):
     _fields_ = [
         ("path", ctypes.c_char * 4096),
         ("old_dll", ctypes.c_void_p),
-        ("file", ctypes.POINTER(GrugFile)),
+        ("file", GrugFile),
     ]
 
 
@@ -462,7 +462,7 @@ def reload_modified_entities():
     for reload_index in range(reloads_size):
         reload = reloads[reload_index]
 
-        file = reload.file.contents
+        file = reload.file
 
         for i in range(2):
             if reload.old_dll == data.human_dlls[i]:
