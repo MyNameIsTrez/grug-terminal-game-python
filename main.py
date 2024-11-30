@@ -160,7 +160,7 @@ def get_type_files_impl(dir: GrugModDir, define_type):
         get_type_files_impl(dir.dirs[i], define_type)
 
     for i in range(dir.files_size):
-        if define_type == dir.files[i].define_type.decode():
+        if dir.files[i].define_type.decode() == define_type:
             data.type_files.append(dir.files[i])
 
 
