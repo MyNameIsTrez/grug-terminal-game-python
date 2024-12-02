@@ -123,10 +123,18 @@ data = Data(
 human_definition: Human = None
 tool_definition: Tool = None
 grug_dll = None
+on_fn_name = None
+on_fn_path = None
 
 
 def game_fn_get_opponent(human_id):
-    assert human_id < 2
+    global on_fn_name, on_fn_path
+    if human_id >= 2:
+        print(
+            f"grug runtime error in {on_fn_name.value.decode()}(): the human_id argument of get_opponent() was {human_id}, while the function only expects it to be up to 2, in {on_fn_path.value.decode()}",
+            file=sys.stderr,
+        )
+        return -1
     return data.humans[human_id].opponent_id
 
 
@@ -135,13 +143,31 @@ def clamp(n, lowest, highest):
 
 
 def game_fn_change_human_health(human_id, added_health):
-    assert human_id < 2
+    global on_fn_name, on_fn_path
+    if human_id >= 2:
+        print(
+            f"grug runtime error in {on_fn_name.value.decode()}(): the human_id argument of change_human_health() was {human_id}, while the function only expects it to be up to 2, in {on_fn_path.value.decode()}",
+            file=sys.stderr,
+        )
+        return -1
+    if added_health == -42:
+        print(
+            f"grug runtime error in {on_fn_name.value.decode()}(): the added_health argument of change_human_health() was -42, while the function deems that number to be forbidden, in {on_fn_path.value.decode()}",
+            file=sys.stderr,
+        )
+        return -1
     human = data.humans[human_id]
     human.health = clamp(human.health + added_health, 0, human.max_health)
 
 
 def game_fn_get_human_parent(tool_id):
-    assert tool_id < 2
+    global on_fn_name, on_fn_path
+    if tool_id >= 2:
+        print(
+            f"grug runtime error in {on_fn_name.value.decode()}(): the tool_id argument of get_human_parent() was {tool_id}, while the function only expects it to be up to 2, in {on_fn_path.value.decode()}",
+            file=sys.stderr,
+        )
+        return -1
     return data.tools[tool_id].human_parent_id
 
 
@@ -492,7 +518,7 @@ def runtime_error_handler(reason, type, on_fn_name, on_fn_path):
 
 
 def main():
-    global grug_dll
+    global grug_dll, on_fn_name, on_fn_path
 
     # RTLD_GLOBAL here allows mods to call functions from adapter.c
     adapter_dll = ctypes.PyDLL("./adapter.so", os.RTLD_GLOBAL)
@@ -514,6 +540,10 @@ def main():
     loading_error_in_grug_file = ctypes.c_bool.in_dll(
         grug_dll, "grug_loading_error_in_grug_file"
     )
+
+    on_fn_name = ctypes.c_char_p.in_dll(grug_dll, "grug_on_fn_name")
+
+    on_fn_path = ctypes.c_char_p.in_dll(grug_dll, "grug_on_fn_path")
 
     while True:
         if grug_dll.grug_regenerate_modified_mods():
