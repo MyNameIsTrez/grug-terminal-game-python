@@ -247,8 +247,17 @@ def fight():
 
 
 def read_size(prompt):
+    text = input(prompt)
+
+    if text == "f":
+        grug_dll.grug_toggle_on_fns_mode()
+        print(
+            f"Toggled grug to {"safe" if grug_dll.grug_are_on_fns_in_safe_mode() else "fast"} mode"
+        )
+        return None
+
     try:
-        age = int(input(prompt))
+        age = int(text)
     except ValueError:
         print("You didn't enter a valid number", file=sys.stderr)
         return None
@@ -534,6 +543,9 @@ def main():
     grug_dll.grug_set_runtime_error_handler(runtime_error_handler)
 
     grug_dll.grug_regenerate_modified_mods.restype = ctypes.c_bool
+
+    grug_dll.grug_toggle_on_fns_mode.restype = None
+    grug_dll.grug_are_on_fns_in_safe_mode.restype = ctypes.c_bool
 
     error = GrugError.in_dll(grug_dll, "grug_error")
 
