@@ -538,16 +538,19 @@ def main():
     # RTLD_GLOBAL here allows mods to access grug_runtime_error_type from grug.c
     grug_dll = ctypes.PyDLL("./grug/grug.so", os.RTLD_GLOBAL)
 
-    grug_dll.grug_set_runtime_error_handler.restype = None
+    error = GrugError.in_dll(grug_dll, "grug_error")
 
-    grug_dll.grug_set_runtime_error_handler(runtime_error_handler)
+    grug_dll.grug_init.restype = ctypes.c_bool
+
+    if grug_dll.grug_init(runtime_error_handler, b"mod_api.json", b"mods"):
+        raise Exception(
+            f"grug_init() error: {error.msg.decode()} (detected in grug.c:{error.grug_c_line_number})"
+        )
 
     grug_dll.grug_regenerate_modified_mods.restype = ctypes.c_bool
 
     grug_dll.grug_toggle_on_fns_mode.restype = None
     grug_dll.grug_are_on_fns_in_safe_mode.restype = ctypes.c_bool
-
-    error = GrugError.in_dll(grug_dll, "grug_error")
 
     loading_error_in_grug_file = ctypes.c_bool.in_dll(
         grug_dll, "grug_loading_error_in_grug_file"
