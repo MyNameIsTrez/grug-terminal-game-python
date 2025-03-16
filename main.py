@@ -792,7 +792,7 @@ def main():
 
     if grug_dll.grug_init(runtime_error_handler, b"mod_api.json", b"mods"):
         raise Exception(
-            f"grug_init() error: {error.msg.decode()} (detected in grug.c:{error.grug_c_line_number})"
+            f"grug_init() error: {error.msg.decode()} (detected by grug.c:{error.grug_c_line_number})"
         )
 
     grug_dll.grug_regenerate_modified_mods.restype = ctypes.c_bool
@@ -813,12 +813,12 @@ def main():
             if error.has_changed:
                 if loading_error_in_grug_file:
                     print(
-                        f"grug loading error: {error.msg.decode()}, in {error.path.decode()} (detected in grug.c:{error.grug_c_line_number})",
+                        f"grug loading error: {error.msg.decode()}, in {error.path.decode()} (detected by grug.c:{error.grug_c_line_number})",
                         file=sys.stderr,
                     )
                 else:
                     print(
-                        f"grug loading error: {error.msg.decode()} (detected in grug.c:{error.grug_c_line_number})",
+                        f"grug loading error: {error.msg.decode()} (detected by grug.c:{error.grug_c_line_number})",
                         file=sys.stderr,
                     )
 
