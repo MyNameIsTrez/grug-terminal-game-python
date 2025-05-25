@@ -25,7 +25,9 @@ class GrugFile(ctypes.Structure):
         ("globals_size", ctypes.c_size_t),
         ("init_globals_fn", ctypes.PYFUNCTYPE(None, ctypes.c_void_p, ctypes.c_uint64)),
         ("on_fns", ctypes.c_void_p),
-        ("resource_mtimes", ctypes.POINTER(ctypes.c_int64)),
+        ("_resource_mtimes", ctypes.POINTER(ctypes.c_int64)),
+        ("_resources_size", ctypes.c_size_t),
+        ("_seen", ctypes.c_bool),
     ]
 
 
@@ -39,10 +41,11 @@ GrugModDir._fields_ = [
     ("name", ctypes.c_char_p),
     ("dirs", ctypes.POINTER(GrugModDir)),
     ("dirs_size", ctypes.c_size_t),
-    ("dirs_capacity", ctypes.c_size_t),
+    ("_dirs_capacity", ctypes.c_size_t),
     ("files", ctypes.POINTER(GrugFile)),
     ("files_size", ctypes.c_size_t),
-    ("files_capacity", ctypes.c_size_t),
+    ("_files_capacity", ctypes.c_size_t),
+    ("_seen", ctypes.c_bool),
 ]
 
 
@@ -781,7 +784,9 @@ def main():
 
     grug_dll.grug_init.restype = ctypes.c_bool
 
-    if grug_dll.grug_init(runtime_error_handler, b"mod_api.json", b"mods", 10):
+    if grug_dll.grug_init(
+        runtime_error_handler, b"mod_api.json", b"mods", b"mod_dlls", 10
+    ):
         raise Exception(
             f"grug_init() error: {error.msg.decode()} (detected by grug.c:{error.grug_c_line_number})"
         )
