@@ -1,6 +1,6 @@
 {
 	"entities": {
-		"human": {
+		"Human": {
 			"description": "An actor that can fight.",
 			"on_functions": {
 				"on_spawn": {
@@ -11,7 +11,7 @@
 				}
 			}
 		},
-		"tool": {
+		"Tool": {
 			"description": "Used by actors to fight each other.",
 			"on_functions": {
 				"on_spawn": {
@@ -82,22 +82,22 @@
 			]
 		},
 		"get_human_parent": {
-			"description": "Gets the human parent's ID",
-			"return_type": "id",
+			"description": "Gets the human parent",
+			"return_type": "Human",
 			"arguments": [
 				{
-					"name": "tool_id",
-					"type": "id"
+					"name": "tool",
+					"type": "Tool"
 				}
 			]
 		},
 		"get_opponent": {
-			"description": "Gets the opponent's ID",
-			"return_type": "id",
+			"description": "Gets the opponent",
+			"return_type": "Human",
 			"arguments": [
 				{
-					"name": "human_id",
-					"type": "id"
+					"name": "human",
+					"type": "Human"
 				}
 			]
 		},
@@ -105,8 +105,8 @@
 			"description": "Changes a human's health",
 			"arguments": [
 				{
-					"name": "human_id",
-					"type": "id"
+					"name": "human",
+					"type": "Human"
 				},
 				{
 					"name": "added_health",

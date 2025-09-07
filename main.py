@@ -157,11 +157,6 @@ def game_fn_change_human_health(human_id, added_health):
             f"change_human_health(): the human_id argument of change_human_health() was {human_id}, while the function only expects it to be up to 2".encode()
         )
         return -1
-    if added_health == -42:
-        grug_dll.grug_game_function_error_happened(
-            f"change_human_health(): the added_health argument of change_human_health() was -42, while the function deems that number to be forbidden".encode()
-        )
-        return -1
     human = data.humans[human_id]
     human.health = clamp(human.health + added_health, 0, human.max_health)
 
@@ -466,7 +461,7 @@ def print_opponent_humans(human_files):
 def pick_opponent():
     print(f"You have {data.gold} gold\n")
 
-    human_files = get_type_files("human")
+    human_files = get_type_files("Human")
 
     if print_opponent_humans(human_files):
         return
@@ -513,7 +508,7 @@ def pick_opponent():
     data.human_dlls[OPPONENT_INDEX] = file.dll
 
     # Give the opponent a random tool
-    tool_files = get_type_files("tool")
+    tool_files = get_type_files("Tool")
     tool_index = random.randrange(len(tool_files))
 
     file = tool_files[tool_index]
@@ -563,7 +558,7 @@ def print_tools(tool_files):
 def pick_tools():
     print(f"You have {data.gold} gold\n")
 
-    tool_files = get_type_files("tool")
+    tool_files = get_type_files("Tool")
 
     if print_tools(tool_files):
         return
@@ -650,7 +645,7 @@ def print_playable_humans(human_files):
 def pick_player():
     print(f"You have {data.gold} gold\n")
 
-    human_files = get_type_files("human")
+    human_files = get_type_files("Human")
 
     if print_playable_humans(human_files):
         return

@@ -4,6 +4,6 @@ on_spawn() {
 }
 
 on_use() {
-    human_parent: id = get_human_parent(me)
-    change_human_health(human_parent, 5)
+    parent: Human = get_human_parent(me)
+    change_human_health(parent, 5)
 }

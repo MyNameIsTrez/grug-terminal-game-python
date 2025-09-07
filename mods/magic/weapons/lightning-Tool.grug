@@ -8,9 +8,11 @@ on_spawn() {
 on_use() {
     uses = uses + 1
 
-    damage: i32 = 42
+    damage: i32 = 20
+
+    # Critical hit
     if uses == 2 {
-        damage = 15
+        damage = 30
         uses = 0
     }
 
@@ -18,7 +20,7 @@ on_use() {
 }
 
 helper_apply_damage(damage: i32) {
-    human_parent: id = get_human_parent(me)
-    opponent: id = get_opponent(human_parent)
+    parent: Human = get_human_parent(me)
+    opponent: Human = get_opponent(parent)
     change_human_health(opponent, -damage)
 }
